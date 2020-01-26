@@ -6,14 +6,15 @@ from sklearn.metrics import accuracy_score
 from scipy import ndimage
 from scipy import misc
 
-##load image
-f = misc.face()
+from sklearn.datasets import load_iris
 
+iris = load_iris()
 
-classifier = neighbors.KNeighborsClassifier(3)
-classifier.fit(f[:,:], f[:,:1])
+print(iris)
+irisData = iris.data
 
-predictions = classifier.predict(f[:,2])
+classfier = neighbors.KNeighborsClassifier(3)
+model = classfier.fit(iris.data, iris.target)
 
-
+print(model.predict(irisData[1:5]))
 
