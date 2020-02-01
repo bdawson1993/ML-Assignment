@@ -3,17 +3,18 @@ import matplotlib.pyplot as plt
 from sklearn import neighbors
 from sklearn.metrics import accuracy_score
 from PIL import Image
+from sklearn.datasets import load_iris
 
-img = Image.open("train/cat.0.jpg").convert("LA")
+iris = load_iris()
 
-data = np.asarray(img)
-print(data.shape)
+print(iris)
+irisData = iris.data
 
-classifiction = neighbors.KNeighborsClassifier(3)
-classifiction.fit(data[:,:,0], np.full(data[:,:,0].shape,1))
+classfier = neighbors.KNeighborsClassifier(3)
+model = classfier.fit(iris.data, iris.target)
 
-predictions = classifiction.predict(data[:,:,0])
 
-print(predictions[:,:])
+print(irisData[1:2])
+print(model.predict(irisData[1:2]))
 
 
