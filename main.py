@@ -18,11 +18,16 @@ def predict(model, data):
     predDef = ["Cat", "Dog"]
     predictions = model.predict(data)
     counts = np.bincount(predictions)
-    print(counts)
-    if(counts[0] > counts[1]):
-        return predDef[0]
+    
+
+    print(len(counts))
+    if len(counts) >= 1:
+        if(counts[0] > counts[1]):
+            return predDef[0]
+        else:
+            return predDef[1]
     else:
-        return predDef[1]
+        return predDef[0]
 
     return -1
     
@@ -50,7 +55,8 @@ model.fit(newImg, target2)
 
 
 #test data
-testImg = LoadImg("cat",50)
+a = input("Number")
+testImg = LoadImg("cat",a)
 x = predict(model, testImg)
 print(x)
 
