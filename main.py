@@ -3,12 +3,16 @@ import matplotlib.pyplot as plt
 from sklearn import neighbors
 from sklearn.metrics import accuracy_score
 import cv2
+import log
 
 
 
 #function to load image
-def LoadImg(tag, number):
-    img = cv2.imread("train/" + str(tag) + "." + str(number) + ".jpg")
+def LoadImg(tag, number, imgType):
+    if(imgType == "test"):
+        number = str(int(number) + 3000)
+
+    img = cv2.imread(imgType + "/" + str(tag) + "." + str(number) + ".jpg")
     img = cv2.resize(img, dsize=(100,100))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
@@ -19,9 +23,7 @@ def predict(model, data):
     predictions = model.predict(data)
     counts = np.bincount(predictions)
     
-
-    print(len(counts))
-    if len(counts) >= 1:
+    if len(counts) > 1:
         if(counts[0] > counts[1]):
             return predDef[0]
         else:
@@ -32,36 +34,56 @@ def predict(model, data):
     return -1
     
 
+def loadAllImgs(tag, amount):
+    mat = LoadImg(tag, 0, "train")
+
+    for i in range(1,3000):
+        img = LoadImg(tag, i, "train")
+        mat = np.concatenate((mat, img))
+
+    return mat
+
+print("Loading Images...")
+cats = loadAllImgs("cat", 3000)
+catsTarget = np.full(cats.shape[0], 0)
+
+dogs = loadAllImgs("dog", 3000)
+imgs = np.concatenate((cats, dogs))
+dogsTarget = np.full(dogs.shape[0],1)
+
+target = np.concatenate((catsTarget, dogsTarget))
+print("Images Loaded...")
 
 
 
-
-
-
-
-
-img = LoadImg("cat", 50)
-img2 = LoadImg("dog", 51)
-newImg = np.concatenate((img, img2))
-
-#build up target array
-target = np.full(img.shape[0], 0)
-target2 = np.concatenate((target, np.full(img2.shape[0], 1)))
 
 #build model
+print()
+print("Building Model...")
+log.start()
 model = neighbors.KNeighborsClassifier(5)
-model.fit(newImg, target2)
-
+model.fit(imgs, target)
+print("Model Built...")
+log.stop()
 
 
 #test data
-a = input("Number")
-testImg = LoadImg("cat",a)
-x = predict(model, testImg)
-print(x)
+print("Testing...")
+count = 0
+for i in range(1,3000):
+    #a = input("Number to Test: ")
+    testImg = LoadImg("dog",i, "test")
+    x = predict(model, testImg)
+
+
+    if(x == "Dog"):
+        count += 1
+
+
+print("Amount Correct")
 
 
 
-plt.imshow(testImg, cmap=plt.get_cmap("gray"))
-plt.show()
+    #plt.imshow(testImg, cmap=plt.get_cmap("gray"))
+    #plt.show()
 
