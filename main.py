@@ -70,17 +70,18 @@ log.stop()
 #test data
 print("Testing...")
 count = 0
-for i in range(1,3000):
+for i in range(1,10):
+    print(i)
     #a = input("Number to Test: ")
-    testImg = LoadImg("dog",i, "test")
+    testImg = LoadImg("cat",i, "test")
     x = predict(model, testImg)
 
 
-    if(x == "Dog"):
+    if(x == "Cat"):
         count += 1
 
 
-print("Amount Correct")
+print(f"Amount Correct {count}")
 
 
 
