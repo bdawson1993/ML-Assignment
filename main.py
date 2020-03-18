@@ -70,18 +70,18 @@ log.stop()
 #test data
 print("Testing...")
 count = 0
-for i in range(1,10):
+for i in range(1,500): #500 test images
     print(i)
     #a = input("Number to Test: ")
-    testImg = LoadImg("cat",i, "test")
+    testImg = LoadImg("dog",i, "test")
     x = predict(model, testImg)
 
 
     if(x == "Cat"):
         count += 1
 
-
-print(f"Amount Correct {count}")
+percentage = count / 500
+print(f"Amount Correct {percentage}")
 
 
 
