@@ -32,8 +32,7 @@ class classifier:
         self.__model = neighbors.KNeighborsClassifier(5)
         self.__model.fit(self.__imgs, target)
         log.stop("Model Built...")
-        
-
+    
     def __LoadImg(self,tag, number, imgType):
         if(imgType == "test"):
             number = str(int(number) + 3000)
