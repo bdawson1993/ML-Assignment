@@ -4,7 +4,9 @@ from sklearn import neighbors
 from sklearn.metrics import accuracy_score
 import cv2
 import log
-
+import threading
+import concurrent.futures
+import multiprocessing
 
 
 #function to load image
@@ -43,6 +45,24 @@ def loadAllImgs(tag, amount):
 
     return mat
 
+count = 0
+def testData(index):
+        print(index)
+        #a = input("Number to Test: ")
+        testImg = LoadImg("dog",index, "test")
+        x = predict(model, testImg)
+
+        if(x == "Cat"):
+            count += 1
+
+       # percentage = count / 500
+        #print(f"Amount Correct {percentage}")
+
+    #plt.imshow(testImg, cmap=plt.get_cmap("gray"))
+    #plt.show()
+
+threadCount = multiprocessing.cpu_count()
+
 print("Loading Images...")
 cats = loadAllImgs("cat", 3000)
 catsTarget = np.full(cats.shape[0], 0)
@@ -69,22 +89,17 @@ log.stop()
 
 #test data
 print("Testing...")
-count = 0
-for i in range(1,500): #500 test images
-    print(i)
-    #a = input("Number to Test: ")
-    testImg = LoadImg("dog",i, "test")
-    x = predict(model, testImg)
 
+#spawn threads to go through
 
-    if(x == "Cat"):
-        count += 1
+with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
+        executor.map(testData, range(500))
+
 
 percentage = count / 500
-print(f"Amount Correct {percentage}")
+print(f"amount corrent {percentage}")
 
 
 
-    #plt.imshow(testImg, cmap=plt.get_cmap("gray"))
-    #plt.show()
+
 
