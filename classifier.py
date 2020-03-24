@@ -1,7 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
+
+#ML libs
 from sklearn import neighbors
+from sklearn import naive_bayes
 from sklearn.metrics import accuracy_score
+from sklearn import svm
+from sklearn.multiclass import OneVsRestClassifier
+
 import cv2
 import log
 import threading
@@ -23,16 +29,34 @@ class classifier:
         self.__imgs = np.concatenate((cats, dogs))
         dogsTarget = np.full(dogs.shape[0],1)
 
-        target = np.concatenate((catsTarget, dogsTarget))
+        self.__target = np.concatenate((catsTarget, dogsTarget))
         log.stop("Images Loaded")
 
         #build model
         print()
-        log.start("Building Model")
-        self.__model = neighbors.KNeighborsClassifier(5)
-        self.__model.fit(self.__imgs, target)
-        log.stop("Model Built...")
+       
     
+    #factory function that builds the selected model
+    def BuildModel(self, tag):
+        log.start("Building Model")
+
+        if(tag == 'KNN'):
+            self.__model = neighbors.KNeighborsClassifier(5)
+            self.__model.fit(self.__imgs, self.__target)
+
+        if(tag == 'GNB'):
+            self.__model = naive_bayes.GaussianNB()
+            self.__model.fit(self.__imgs, self.__target)
+
+        if(tag == 'SVM'):
+            self.__model = svm.SVC(kernel='poly', gamma=10)
+            self.__model.fit(self.__imgs, self.__target)
+
+
+        log.stop("Model Built...")
+
+
+
     def __LoadImg(self,tag, number, imgType):
         if(imgType == "test"):
             number = str(int(number) + 3000)
@@ -52,7 +76,7 @@ class classifier:
         return mat
 
     def testData(self,index):
-        print(index)
+        #print(index)
         #a = input("Number to Test: ")
         testImg = self.__LoadImg("dog",index, "test")
         #print(testImg[1])

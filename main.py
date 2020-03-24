@@ -3,10 +3,17 @@ import concurrent.futures
 import multiprocessing
 import log
 
-classif = classifier.classifier()
-threadCount = multiprocessing.cpu_count()
 
-#spawn threads to go through
+classif = classifier.classifier()
+print("KNN")
+print("GNB")
+print("SVM")
+classTag = input("Please Enter Classifier to use:")
+classif.BuildModel(classTag)
+
+
+#spawn threads to go through and test the data
+threadCount = multiprocessing.cpu_count()
 log.start("Testing Data")
 with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
        for index in range(500):
