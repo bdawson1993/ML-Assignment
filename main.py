@@ -7,7 +7,7 @@ import log
 classif = classifier.classifier()
 print("KNN")
 print("GNB")
-print("SVM")
+print("CNN")
 classTag = input("Please Enter Classifier to use:")
 classif.BuildModel(classTag)
 

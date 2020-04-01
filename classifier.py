@@ -8,6 +8,9 @@ from sklearn.metrics import accuracy_score
 from sklearn import svm
 from sklearn.multiclass import OneVsRestClassifier
 
+from tensorflow import keras
+from tensorflow.keras import layers
+
 import cv2
 import log
 import threading
@@ -22,7 +25,7 @@ class classifier:
 
         #load imgs
         log.start("Loading Images")
-        cats = self.__loadAllImgs("cat", 3000)
+        self.__cats = self.__loadAllImgs("cat", 3000)
         catsTarget = np.full(cats.shape[0], 0)
 
         dogs = self.__loadAllImgs("dog", 3000)
@@ -48,9 +51,18 @@ class classifier:
             self.__model = naive_bayes.GaussianNB()
             self.__model.fit(self.__imgs, self.__target)
 
-        if(tag == 'SVM'):
-            self.__model = svm.SVC(kernel='poly', gamma=10)
-            self.__model.fit(self.__imgs, self.__target)
+        if(tag == 'CNN'):
+            #self.__model = svm.SVC(kernel='poly', gamma=10)
+            #self.__model.fit(self.__imgs, self.__target)
+            #inputs = keras.Input(shape=(100,100,3), name='cat_image')
+            #x = layers.Flatten(name='flattened_cat')(self.__cats)
+
+            #x = layers.Dense(2, activation='relu', nam='encoder')(x)
+            #x = layers.Dense(2, activation='relu', name='middle_layer')(x)
+            #x = layers.Dense(len(self.__cats)/2, activation='relu', name='decoder')(x)
+
+
+
 
 
         log.stop("Model Built...")
