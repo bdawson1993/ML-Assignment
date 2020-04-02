@@ -142,13 +142,14 @@ class classifier:
         x = self.predict(testImg)
         #print(x)
         
+        #print(x)
         
         #thread safe addition
-        if(x[0] == goal):
-           # with self.__lock:
-            localCopy = self.__value
-            localCopy += 1
-            self.__value = localCopy
+        if(x.Trim() == goal):
+            with self.__lock:
+                localCopy = self.__value
+                localCopy += 1
+                self.__value = localCopy
                 
         #print("RAN!")
 
