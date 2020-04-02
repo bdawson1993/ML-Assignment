@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from images import Image 
+
 
 #ML libs
 from sklearn import neighbors
@@ -23,16 +25,19 @@ class classifier:
         self.__lock = threading.Lock()
         self.__model = 0
 
-        #load imgs
+        #load cats
         log.start("Loading Images")
         self.__cats = self.__loadAllImgs("cat", 3000)
-        catsTarget = np.full(cats.shape[0], 0)
+        for i in range(len(self.__cats)):
+            self.__cats[i].SetTarget(0)
 
-        dogs = self.__loadAllImgs("dog", 3000)
-        self.__imgs = np.concatenate((cats, dogs))
-        dogsTarget = np.full(dogs.shape[0],1)
+        #load dogs
+        self.__dogs = self.__loadAllImgs("dog", 3000)
+        for i in range(len(self.__dogs)):
+            self.__dogs[i].SetTarget(1)
 
-        self.__target = np.concatenate((catsTarget, dogsTarget))
+        
+        self.__imgs = self.__cats + self.__dogs
         log.stop("Images Loaded")
 
         #build model
@@ -60,12 +65,8 @@ class classifier:
             #x = layers.Dense(2, activation='relu', nam='encoder')(x)
             #x = layers.Dense(2, activation='relu', name='middle_layer')(x)
             #x = layers.Dense(len(self.__cats)/2, activation='relu', name='decoder')(x)
-
-
-
-
-
-        log.stop("Model Built...")
+            print("test")
+    log.stop("Model Built...")
 
 
 
@@ -76,14 +77,19 @@ class classifier:
         img = cv2.imread(imgType + "/" + str(tag) + "." + str(number) + ".jpg")
         img = cv2.resize(img, dsize=(100,100))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        return img
+        
+        image = Image()
+        image.SetData(img)
+
+
+        return image
 
     def __loadAllImgs(self,tag, amount):
-        mat = self.__LoadImg(tag, 0, "train")
+        mat = list()
 
         for i in range(1,3000):
             img = self.__LoadImg(tag, i, "train")
-            mat = np.concatenate((mat, img))
+            mat.append(img)
 
         return mat
 
