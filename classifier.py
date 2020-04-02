@@ -25,41 +25,63 @@ class classifier:
         self.__model = 0
 
         #load imgs
+        
+        
         log.start("Loading Images")
+        
+        #load cats image
         cats = self.__loadAllImgs("cat", 3000)
-        catsTarget = np.full(cats.shape[0], 0)
+        catsA = np.asarray(cats)
+        catsTarget = np.full(catsA.shape[0], 0)
+        print("Cats Shape: " + str(catsA.shape))
 
+
+        #load dog images
         dogs = self.__loadAllImgs("dog", 3000)
-        self.__imgs = np.concatenate((cats, dogs))
-        dogsTarget = np.full(dogs.shape[0],1)
-
+        dogsA = np.asarray(dogs)
+        dogsTarget = np.full(dogsA.shape[0],1)
+        print("Dogs Shape: " + str(catsA.shape))
+        
+        
+        #join arrays and print results
+        self.__imgs = np.concatenate((catsA, dogsA))
         self.__target = np.concatenate((catsTarget, dogsTarget))
+        print("Final Image Shape: " + str(self.__imgs.shape))
+        print("Final Target Shape: " + str(self.__target.shape))
+        
+        print(self.__target)
+        
         log.stop("Images Loaded")
 
         #build model
-        print(self.__imgs.shape)
+        #print(self.__imgs.shape)
         print()
        
     
     #factory function that builds the selected model
     def BuildModel(self, tag):
+        
         log.start("Building Model")
 
         if(tag == 'KNN'):
+            nsamples, nx, ny = self.__imgs.shape
+            reshapedA = self.__imgs.reshape((nsamples, nx * ny ))
+            
+            
             self.__model = neighbors.KNeighborsClassifier(5)
-            self.__model.fit(self.__imgs, self.__target)
+            self.__model.fit(reshapedA, self.__target)
 
         if(tag == 'GNB'):
             self.__model = naive_bayes.GaussianNB()
-            self.__model.fit(self.__imgs, self.__target)
+            self.__model.fit(reshapedA, self.__target)
 
         if(tag == 'CNN'):
-            #self.__imgs = self.__imgs.reshape(6000,100,100, 1)
+            self.__imgs = self.__imgs.reshape(6000,100,100,1)
             #self.__target = self.__target.reshape(10)
 
             
             model = Sequential()
-            model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=(600000,100,0)))
+            model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=self.__imgs.shape))
 
             model.add(Conv2D(32, kernel_size=3, activation='relu'))
 
@@ -68,6 +90,7 @@ class classifier:
 
             
             model.compile(optimizer="adam", loss='categorical_crossentropy')
+            print("Model fit")
             model.fit(self.__imgs, self.__target)
 
 
@@ -81,52 +104,63 @@ class classifier:
             number = str(int(number) + 3000)
 
         img = cv2.imread(imgType + "/" + str(tag) + "." + str(number) + ".jpg")
-        img = cv2.resize(img, dsize=(100,100))
+        img = cv2.resize(img, dsize=(250,250))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         return img
 
     def __loadAllImgs(self,tag, amount):
-        mat = self.__LoadImg(tag, 0, "train")
+        mat = []
+        mat.append(self.__LoadImg(tag, 0, "train"))
        
         for i in progressbar.progressbar(range(1,3000)):
             img = self.__LoadImg(tag, i, "train")
-            mat = np.concatenate((mat, img))
+           # mat = np.concatenate((mat, img))
+            mat.append(img)
+            
 
         return mat
 
     
 
 
-    def testData(self,index):
+    def testData(self,index, goal):
         
-        #print(index)
         #a = input("Number to Test: ")
-        testImg = self.__LoadImg("dog",index, "test")
-        #print(testImg[1])
+        index += 1
+        
+        #load test img and resize
+        testImg = []
+        testImg.append(self.__LoadImg(goal,index, "test"))
+        testImg = np.asarray(testImg)
+        
+        #resize
+        nsamples, nx, ny = testImg.shape
+        testImg = testImg.reshape(nsamples, nx*ny)
+        
+        
+        #predice
         x = self.predict(testImg)
-
-            
-        if(x == "Cat"):
-            with self.__lock:
-                localCopy = self.__value
-                localCopy += 1
-                self.__value = localCopy
+        #print(x)
+        
+        
+        if(x[0] == goal):
+           # with self.__lock:
+            localCopy = self.__value
+            localCopy += 1
+            self.__value = localCopy
+                
+        #print("RAN!")
 
     def predict(self, data):
-
+        #print("predict")
         predDef = ["Cat", "Dog"]
         predictions = self.__model.predict(data)
-        counts = np.bincount(predictions)
         
-        if len(counts) > 1:
-            if(counts[0] > counts[1]):
-                return predDef[0]
-            else:
-                return predDef[1]
-        else:
-            return predDef[0]
-
-        return -1
+        
+        #print("Predicted Label:"+ str( predictions))
+        #counts = np.bincount(predictions)
+        
+        return preDef[predictions[0]]
 
     def GetCorrect(self):
         return self.__value
