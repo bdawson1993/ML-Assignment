@@ -1,7 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from images import Image 
-
+import numpy as np
 
 #ML libs
 from sklearn import neighbors
@@ -9,15 +7,16 @@ from sklearn import naive_bayes
 from sklearn.metrics import accuracy_score
 from sklearn import svm
 from sklearn.multiclass import OneVsRestClassifier
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Flatten
 
-from tensorflow import keras
-from tensorflow.keras import layers
 
 import cv2
 import log
 import threading
 import concurrent.futures
 import multiprocessing
+import progressbar
 
 class classifier:
     def __init__(self):
@@ -25,22 +24,20 @@ class classifier:
         self.__lock = threading.Lock()
         self.__model = 0
 
-        #load cats
+        #load imgs
         log.start("Loading Images")
-        self.__cats = self.__loadAllImgs("cat", 3000)
-        for i in range(len(self.__cats)):
-            self.__cats[i].SetTarget(0)
+        cats = self.__loadAllImgs("cat", 3000)
+        catsTarget = np.full(cats.shape[0], 0)
 
-        #load dogs
-        self.__dogs = self.__loadAllImgs("dog", 3000)
-        for i in range(len(self.__dogs)):
-            self.__dogs[i].SetTarget(1)
+        dogs = self.__loadAllImgs("dog", 3000)
+        self.__imgs = np.concatenate((cats, dogs))
+        dogsTarget = np.full(dogs.shape[0],1)
 
-        
-        self.__imgs = self.__cats + self.__dogs
+        self.__target = np.concatenate((catsTarget, dogsTarget))
         log.stop("Images Loaded")
 
         #build model
+        print(self.__imgs.shape)
         print()
        
     
@@ -57,16 +54,25 @@ class classifier:
             self.__model.fit(self.__imgs, self.__target)
 
         if(tag == 'CNN'):
-            #self.__model = svm.SVC(kernel='poly', gamma=10)
-            #self.__model.fit(self.__imgs, self.__target)
-            #inputs = keras.Input(shape=(100,100,3), name='cat_image')
-            #x = layers.Flatten(name='flattened_cat')(self.__cats)
+            #self.__imgs = self.__imgs.reshape(6000,100,100, 1)
+            #self.__target = self.__target.reshape(10)
 
-            #x = layers.Dense(2, activation='relu', nam='encoder')(x)
-            #x = layers.Dense(2, activation='relu', name='middle_layer')(x)
-            #x = layers.Dense(len(self.__cats)/2, activation='relu', name='decoder')(x)
-            print("test")
-    log.stop("Model Built...")
+            
+            model = Sequential()
+            model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=(600000,100,0)))
+
+            model.add(Conv2D(32, kernel_size=3, activation='relu'))
+
+            model.add(Flatten())
+            model.add(Dense(10, activation="softmax"))
+
+            
+            model.compile(optimizer="adam", loss='categorical_crossentropy')
+            model.fit(self.__imgs, self.__target)
+
+
+
+        log.stop("Model Built...")
 
 
 
@@ -77,23 +83,22 @@ class classifier:
         img = cv2.imread(imgType + "/" + str(tag) + "." + str(number) + ".jpg")
         img = cv2.resize(img, dsize=(100,100))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        image = Image()
-        image.SetData(img)
-
-
-        return image
+        return img
 
     def __loadAllImgs(self,tag, amount):
-        mat = list()
-
-        for i in range(1,3000):
+        mat = self.__LoadImg(tag, 0, "train")
+       
+        for i in progressbar.progressbar(range(1,3000)):
             img = self.__LoadImg(tag, i, "train")
-            mat.append(img)
+            mat = np.concatenate((mat, img))
 
         return mat
 
+    
+
+
     def testData(self,index):
+        
         #print(index)
         #a = input("Number to Test: ")
         testImg = self.__LoadImg("dog",index, "test")
