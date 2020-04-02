@@ -26,11 +26,9 @@ if taskPick == 1:
     #spawn threads to go through and test the data
     threadCount = multiprocessing.cpu_count()
     log.start("Testing Data")
-   # with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
-    for index in range(500):
-           # print(index)
-        #executor.submit(classif.testData, index)
-        classif.testData(index, "cat")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
+        for index in range(500):
+            executor.submit(classif.testData, index, "cat")
             
 
                     

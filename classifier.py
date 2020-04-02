@@ -154,7 +154,7 @@ class classifier:
 
     def predict(self, data):
         #print("predict")
-        predDef = ["Cat", "Dog"]
+        predDef = ["cat", "dog"]
         predictions = self.__model.predict(data)
         
         
