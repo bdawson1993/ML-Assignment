@@ -143,6 +143,7 @@ class classifier:
         #print(x)
         
         
+        #thread safe addition
         if(x[0] == goal):
            # with self.__lock:
             localCopy = self.__value
@@ -160,7 +161,7 @@ class classifier:
         #print("Predicted Label:"+ str( predictions))
         #counts = np.bincount(predictions)
         
-        return preDef[predictions[0]]
+        return predDef[predictions[0]]
 
     def GetCorrect(self):
         return self.__value

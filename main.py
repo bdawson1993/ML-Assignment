@@ -30,7 +30,7 @@ if taskPick == 1:
     for index in range(500):
            # print(index)
         #executor.submit(classif.testData, index)
-        classif.testData(index)
+        classif.testData(index, "cat")
             
 
                     
