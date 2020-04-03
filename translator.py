@@ -18,21 +18,12 @@ class Translator:
         for i in lines:
             self.__text.append(i)
 
-        print(self.__text[1])
+        print(self.__text[1].split("\t"))
 
 
     def BuildModel(self, tag):
-
-        #CNN
-        model = Sequential()
-        model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=(32,32,1)))
-
-        model.add(Conv2D(32, kernel_size=3, activation='relu'))
-
-        model.add(Flatten())
-        model.add(Dense(10, activation="softmax"))
-
-        model.compile(optimizer="adam", loss='categorical_crossentropy')
+        print("test")
+       
 
 
         

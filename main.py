@@ -19,10 +19,10 @@ if taskPick == 1:
     grey = input("Greyscale Images y/n: ")
     
     classif = classifier.classifier(grey)
-    print("KNN")
-    print("GNB")
-    print("CNN")
-    classTag = input("Please Enter Classifier to use:")
+    print("1. KNN")
+    print("2. GNB")
+    print("3. CNN")
+    classTag = int(input("Please Enter Classifier to use:"))
     classif.BuildModel(classTag)
 
 

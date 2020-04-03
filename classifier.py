@@ -26,6 +26,7 @@ class classifier:
         self.__lock = threading.Lock()
         self.__model = 0
         self.__greyScale = greyscale
+        self.__wasNN = False
 
         #load imgs
         
@@ -67,7 +68,8 @@ class classifier:
         log.start("Building Model")
 
         
-        if(tag == 'KNN'):
+        #K- Nearest Neighbour
+        if(tag == 1):
             nsamples, nx, ny, nz = self.__imgs.shape
             reshapedA = self.__imgs.reshape((nsamples, (nx * ny)*nz ))
             
@@ -75,41 +77,45 @@ class classifier:
             self.__model = neighbors.KNeighborsClassifier(5)
             self.__model.fit(reshapedA, self.__target)
 
-        if(tag == 'GNB'):
+        #Gausian
+        if(tag == 2):
             nsamples, nx, ny = self.__imgs.shape
-            reshapedA = self.__imgs.reshape((nsamples, nx * ny ))
+            reshapedA = self.__imgs.reshape((nsamples, (nx * ny)*nz ))
             
             
             self.__model = naive_bayes.GaussianNB()
             self.__model.fit(reshapedA, self.__target)
 
-        if(tag == 'CNN'):
-           
+
+        #Convultinal Neaural Network
+        if(tag == 3):
+            self.__wasNN = True
             #cnnImgs = self.__imgs.reshape(6000,100,100,1)
             #print("Shape")
             #print(cnnImgs.shape)
             #self.__imgs = np.insert(self.__imgs, 1, axis=4)
             #self.__imgs.insert
             #self.__target = self.__target.reshape(10)
-
             
+            #data for the network
             rows = self.__imgs[0].shape[0]
             cols = self.__imgs[0].shape[1]
             self.__target = to_categorical(self.__target)
            
         
-            model = Sequential()
-            model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=(rows,cols,3)))
+        
+            self.__model = Sequential()
+            self.__model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=(rows,cols,3))) #input layer
 
-            model.add(Conv2D(32, kernel_size=3, activation='relu'))
+            self.__model.add(Conv2D(32, kernel_size=3, activation='relu')) #hidden
 
-            model.add(Flatten())
-            model.add(Dense(2, activation="softmax"))
+            self.__model.add(Flatten())
+            self.__model.add(Dense(2, activation="softmax")) #outpur 
 
             
-            model.compile(optimizer="adam", loss='categorical_crossentropy')
-            print("Model fit")
-            model.fit(self.__imgs, self.__target)
+            self.__model.compile(optimizer="adam", loss='categorical_crossentropy')
+        
+            self.__model.fit(self.__imgs, self.__target)
 
 
 
@@ -161,8 +167,9 @@ class classifier:
         testImg = np.asarray(testImg)
         
         #resize
-        nsamples, nx, ny, nz = testImg.shape
-        testImg = testImg.reshape(nsamples, (nx*ny)*nz)
+        if(self.__wasNN == False):
+            nsamples, nx, ny, nz = testImg.shape
+            testImg = testImg.reshape(nsamples, (nx*ny)*nz)
         
         
         #predice
@@ -186,7 +193,8 @@ class classifier:
         predictions = self.__model.predict(data)
         
         
-        #print("Predicted Label:"+ str( predictions))
+        print("Predicted Label:")
+        print(predictions)
         #counts = np.bincount(predictions)
         
         return predDef[predictions[0]]
