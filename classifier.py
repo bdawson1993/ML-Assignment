@@ -17,12 +17,15 @@ import threading
 import concurrent.futures
 import multiprocessing
 import progressbar
+from keras.utils import to_categorical
+
 
 class classifier:
-    def __init__(self):
+    def __init__(self, greyscale):
         self.__value = 0
         self.__lock = threading.Lock()
         self.__model = 0
+        self.__greyScale = greyscale
 
         #load imgs
         
@@ -63,30 +66,45 @@ class classifier:
         
         log.start("Building Model")
 
+        
         if(tag == 'KNN'):
-            nsamples, nx, ny = self.__imgs.shape
-            reshapedA = self.__imgs.reshape((nsamples, nx * ny ))
+            nsamples, nx, ny, nz = self.__imgs.shape
+            reshapedA = self.__imgs.reshape((nsamples, (nx * ny)*nz ))
             
             
             self.__model = neighbors.KNeighborsClassifier(5)
             self.__model.fit(reshapedA, self.__target)
 
         if(tag == 'GNB'):
+            nsamples, nx, ny = self.__imgs.shape
+            reshapedA = self.__imgs.reshape((nsamples, nx * ny ))
+            
+            
             self.__model = naive_bayes.GaussianNB()
             self.__model.fit(reshapedA, self.__target)
 
         if(tag == 'CNN'):
-            self.__imgs = self.__imgs.reshape(6000,100,100,1)
+           
+            #cnnImgs = self.__imgs.reshape(6000,100,100,1)
+            #print("Shape")
+            #print(cnnImgs.shape)
+            #self.__imgs = np.insert(self.__imgs, 1, axis=4)
+            #self.__imgs.insert
             #self.__target = self.__target.reshape(10)
 
             
+            rows = self.__imgs[0].shape[0]
+            cols = self.__imgs[0].shape[1]
+            self.__target = to_categorical(self.__target)
+           
+        
             model = Sequential()
-            model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=self.__imgs.shape))
+            model.add(Conv2D(64, kernel_size=3, activation='relu', input_shape=(rows,cols,3)))
 
             model.add(Conv2D(32, kernel_size=3, activation='relu'))
 
             model.add(Flatten())
-            model.add(Dense(10, activation="softmax"))
+            model.add(Dense(2, activation="softmax"))
 
             
             model.compile(optimizer="adam", loss='categorical_crossentropy')
@@ -100,12 +118,21 @@ class classifier:
 
 
     def __LoadImg(self,tag, number, imgType):
+        
+        
         if(imgType == "test"):
             number = str(int(number) + 3000)
 
-        img = cv2.imread(imgType + "/" + str(tag) + "." + str(number) + ".jpg")
+        path = imgType + "/" + str(tag) + "." + str(number) + ".jpg"
+        
+        img = cv2.imread(path)
         img = cv2.resize(img, dsize=(250,250))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        
+        if(self.__greyScale == "y"):
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+     
         return img
 
     def __loadAllImgs(self,tag, amount):
@@ -134,8 +161,8 @@ class classifier:
         testImg = np.asarray(testImg)
         
         #resize
-        nsamples, nx, ny = testImg.shape
-        testImg = testImg.reshape(nsamples, nx*ny)
+        nsamples, nx, ny, nz = testImg.shape
+        testImg = testImg.reshape(nsamples, (nx*ny)*nz)
         
         
         #predice
@@ -145,7 +172,7 @@ class classifier:
         #print(x)
         
         #thread safe addition
-        if(x.Trim() == goal):
+        if(x == goal):
             with self.__lock:
                 localCopy = self.__value
                 localCopy += 1

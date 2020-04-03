@@ -15,7 +15,10 @@ taskPick = int(input("Please pick a task: "))
 
 #image classfication
 if taskPick == 1:
-    classif = classifier.classifier()
+    
+    grey = input("Greyscale Images y/n: ")
+    
+    classif = classifier.classifier(grey)
     print("KNN")
     print("GNB")
     print("CNN")
@@ -25,10 +28,10 @@ if taskPick == 1:
 
     #spawn threads to go through and test the data
     threadCount = multiprocessing.cpu_count()
-    log.start("Testing Data")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
-        for index in range(500):
-            executor.submit(classif.testData, index, "cat")
+    classif.testData(0, "cat")
+    #with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
+     #   for index in range(500):
+      #      executor.submit(classif.testData, index, "cat")
             
 
                     
