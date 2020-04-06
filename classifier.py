@@ -18,10 +18,13 @@ import concurrent.futures
 import multiprocessing
 import progressbar
 from keras.utils import to_categorical
+import tensorflow as tf
 
 
 class classifier:
     def __init__(self, greyscale):
+       
+        
         self.__value = 0
         self.__lock = threading.Lock()
         self.__model = 0
@@ -113,8 +116,8 @@ class classifier:
             self.__model.add(Dense(2, activation="softmax")) #outpur 
 
             
-            self.__model.compile(optimizer="adam", loss='categorical_crossentropy')
-        
+    
+            self.__model.compile(optimizer="adam", loss='categorical_crossentropy',)
             self.__model.fit(self.__imgs, self.__target)
 
 
@@ -193,11 +196,17 @@ class classifier:
         predictions = self.__model.predict(data)
         
         
-        print("Predicted Label:")
-        print(predictions)
+       # print("Predicted Label:")
+       # print(predictions[0,1])
         #counts = np.bincount(predictions)
-        
-        return predDef[predictions[0]]
-
+    
+        if self.__wasNN == False:    
+            return predDef[predictions[0]]
+        else:
+            if predictions[0,0] > predictions[0,1]:
+                return predDef[0]
+            else:
+                return predDef[1]
+    
     def GetCorrect(self):
         return self.__value

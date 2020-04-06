@@ -6,6 +6,8 @@ import multiprocessing
 import log
 import progressbar
 
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
 #show options to user
 print("Classification 1")
@@ -26,16 +28,16 @@ if taskPick == 1:
     classif.BuildModel(classTag)
 
 
+    #test data
+    log.start("Testing...")
     #spawn threads to go through and test the data
     threadCount = multiprocessing.cpu_count()
-    classif.testData(0, "cat")
-    #with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
-     #   for index in range(500):
-      #      executor.submit(classif.testData, index, "cat")
-            
-
-                    
+    #classif.testData(0, "cat")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
+        for index in range(500):
+            executor.submit(classif.testData, index, "dog")
     log.stop("Testing Finished")
+
 
     print(classif.GetCorrect())
     percentage = classif.GetCorrect() / 500
