@@ -92,6 +92,10 @@ class classifier:
 
         #Convultinal Neaural Network
         if(tag == 3):
+            
+            
+            
+            
             self.__wasNN = True
             #cnnImgs = self.__imgs.reshape(6000,100,100,1)
             #print("Shape")
@@ -117,7 +121,7 @@ class classifier:
 
             
     
-            self.__model.compile(optimizer="adam", loss='categorical_crossentropy',)
+            self.__model.compile(optimizer="adam", loss='categorical_crossentropy')
             self.__model.fit(self.__imgs, self.__target)
 
 

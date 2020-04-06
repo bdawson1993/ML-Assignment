@@ -1,4 +1,3 @@
-# encoding: utf-8
 import classifier
 import translator
 import concurrent.futures
@@ -8,6 +7,7 @@ import progressbar
 
 from tensorflow.python.client import device_lib
 print(device_lib.list_local_devices())
+print("-------------------------------------------------------------")
 
 #show options to user
 print("Classification 1")
@@ -38,21 +38,18 @@ if taskPick == 1:
             executor.submit(classif.testData, index, "dog")
     log.stop("Testing Finished")
 
-
-    print(classif.GetCorrect())
+    print("-------------------------------------------------------------")
+    print(str(classif.GetCorrect()) + " Images correctly classfied ")
     percentage = classif.GetCorrect() / 500
     print(f"amount corrent {percentage}")
+    print("--------END---------")
 
 
 #language translanation
 if taskPick == 2:
+    
+    
+    
     translator = translator.Translator()
     translator.LoadAllText("test")
-    translator.BuildModel("test")
-
-
-
-
-
-
-
+    translator.BuildModel("RNN")
