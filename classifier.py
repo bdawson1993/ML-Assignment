@@ -37,14 +37,14 @@ class classifier:
         log.start("Loading Images")
         
         #load cats image
-        cats = self.__loadAllImgs("cat", 3000)
+        cats = self.__loadAllImgs("cat", 50)
         catsA = np.asarray(cats)
         catsTarget = np.full(catsA.shape[0], 0)
         print("Cats Shape: " + str(catsA.shape))
 
 
         #load dog images
-        dogs = self.__loadAllImgs("dog", 3000)
+        dogs = self.__loadAllImgs("dog", 50)
         dogsA = np.asarray(dogs)
         dogsTarget = np.full(dogsA.shape[0],1)
         print("Dogs Shape: " + str(catsA.shape))
@@ -152,7 +152,7 @@ class classifier:
         mat = []
         mat.append(self.__LoadImg(tag, 0, "train"))
        
-        for i in progressbar.progressbar(range(1,3000)):
+        for i in progressbar.progressbar(range(1,amount)):
             img = self.__LoadImg(tag, i, "train")
            # mat = np.concatenate((mat, img))
             mat.append(img)

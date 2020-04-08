@@ -9,11 +9,11 @@ import math
 
 class Translator:
     def __init__(self):
-        self.__german = list()
-        self.__english = list()
+        self.__german = list() #raw loaded german sentences
+        self.__english = list() #raw loaded english sentences
         
-        self.__germanWords = dict([('none', -1)])
-        self.__englishWords = dict([('none', -1)])
+        self.__germanWords = dict([('none', -1)]) #unique german words encoded
+        self.__englishWords = dict([('none', -1)]) #unique english words encoded
         self.__currentID = 0
         self.__reverseLookup = dict([(-1, 'none')]) #used for tranforming matrixes back to words faster than iteracting through both dics
      
@@ -31,8 +31,6 @@ class Translator:
         
         return npArray
         
-        
-    
     #give each unique word a ID
     def __Tokenize(self, line, language):
         words = text_to_word_sequence(line)
@@ -166,6 +164,7 @@ class Translator:
         #germanMat = germanMat.reshape((germanMat.shape[0], germanMat.shape[1],1))
         #NgermanMat = np.swapaxes(germanMat, 0, 1)
         
+        #print word info
         print(f"English Mat Shape {englishMat.shape}")
         print(f"Gemrna Mat Shape {germanMat.shape}")
         print()
@@ -190,18 +189,20 @@ class Translator:
             model.add(Flatten())
             model.add(RepeatVector(12))
             
-            model.add(Bidirectional(GRU(32, return_sequences=True)))
-            #model.add(TimeDistributed((Dense(12, activation='relu'))))
-            #model.add(Dropout(0.5))
+            model.add(Bidirectional(GRU(12, return_sequences=True)))
+            model.add(TimeDistributed((Dense(12, activation='relu'))))
+            model.add(Flatten())
+            model.add(RepeatVector(12))
+            model.add(Dropout(0.5))
             
             model.add(Flatten())
-            model.add(Dense(12, activation='softmax')) #output
+            model.add(Dense(12, activation='relu')) #output
             
             print("Compiling")
-            model.compile(optimizer="adam", loss='mean_squared_logarithmic_error')
+            model.compile(optimizer="adam", loss='mean_squared_logarithmic_error', metrics=["accuracy"])
             
             print("Fitting")
-            model.fit(englishMat, germanMat, epochs=10)
+            model.fit(englishMat, germanMat, epochs=30)
             
             #englishMat.append(self.__SentenceToMatrix(self.__english[i]))
             
@@ -210,15 +211,16 @@ class Translator:
             y = self.__padarray(y, 12)
             
             x = model.predict(y)
+            print(x)
             x = x.astype(int)
             print(x)
             
             val = []
             for i in range(12):
                 #round was causing loss of data
-                strV = float(x[0,i])
-                print(strV)
-                val.append(int(strV[0]))
+                #strV = float(x[0,i])
+                #print(strV)
+                val.append(x[0,i])
             print()
             
             print("Inputed Sentence " + str(self.__english[0]))
