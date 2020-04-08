@@ -9,7 +9,7 @@ from tensorflow.python.client import device_lib
 print(device_lib.list_local_devices())
 print("-------------------------------------------------------------")
 
-#show options to user
+#show options to user22
 print("Classification 1")
 print("Translation 2")
 taskPick = int(input("Please pick a task: "))
@@ -47,8 +47,6 @@ if taskPick == 1:
 
 #language translanation
 if taskPick == 2:
-    
-    
     
     translator = translator.Translator()
     translator.LoadAllText("test")
