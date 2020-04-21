@@ -37,6 +37,7 @@ if taskPick == 1:
     with concurrent.futures.ThreadPoolExecutor(max_workers=threadCount) as executor:
         for index in range(500):
             executor.submit(classif.testData, index, "dog")
+            
     log.stop("Testing Finished")
 
     print("-------------------------------------------------------------")
@@ -47,8 +48,6 @@ if taskPick == 1:
 
 
 #language translanation
-if taskPick == 2:
-    
+if taskPick == 2: 
     translator = translator.Translator()
-    translator.LoadAllText("test")
     translator.BuildModel("RNN")

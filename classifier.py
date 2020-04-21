@@ -33,18 +33,20 @@ class classifier:
 
         #load imgs
         
+        numberOfImgs = int(input("How many images (Max: 3000):"))
+        
         
         log.start("Loading Images")
         
         #load cats image
-        cats = self.__loadAllImgs("cat", 50)
+        cats = self.__loadAllImgs("cat", numberOfImgs)
         catsA = np.asarray(cats)
         catsTarget = np.full(catsA.shape[0], 0)
         print("Cats Shape: " + str(catsA.shape))
 
 
         #load dog images
-        dogs = self.__loadAllImgs("dog", 50)
+        dogs = self.__loadAllImgs("dog", numberOfImgs)
         dogsA = np.asarray(dogs)
         dogsTarget = np.full(dogsA.shape[0],1)
         print("Dogs Shape: " + str(catsA.shape))
@@ -82,7 +84,7 @@ class classifier:
 
         #Gausian
         if(tag == 2):
-            nsamples, nx, ny = self.__imgs.shape
+            nsamples, nx, ny, nz = self.__imgs.shape
             reshapedA = self.__imgs.reshape((nsamples, (nx * ny)*nz ))
             
             
@@ -122,7 +124,7 @@ class classifier:
             
     
             self.__model.compile(optimizer="adam", loss='categorical_crossentropy')
-            self.__model.fit(self.__imgs, self.__target)
+            self.__model.fit(self.__imgs, self.__target,epochs=3)
 
 
 

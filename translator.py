@@ -16,7 +16,10 @@ class Translator:
         self.__englishWords = dict([('none', -1)]) #unique english words encoded
         self.__currentID = 0
         self.__reverseLookup = dict([(-1, 'none')]) #used for tranforming matrixes back to words faster than iteracting through both dics
-     
+        self.__englishTest = list()
+        self.__germanTest = list()
+        self.__LoadAllText("test", self.__german, self.__english)
+        self.__count = 0
         
     def __convertList(self, data, max):
         
@@ -71,7 +74,7 @@ class Translator:
             
             
     #load all text files
-    def LoadAllText(self, tag):
+    def __LoadAllText(self, tag, germanSentences, englishSentences):
         loc = "translation/" + "ger-"+tag + ".txt" 
        
         textFile = open(loc, "r", encoding="latin-1")
@@ -80,8 +83,8 @@ class Translator:
         lines = textFile.readlines()
         for i in  range(len(lines)):
             split = lines[i].split("\t")
-            self.__german.append(split[0])
-            self.__english.append(split[1])
+            germanSentences.append(split[0])
+            englishSentences.append(split[1])
             
             
             #tokenize words
@@ -111,7 +114,47 @@ class Translator:
                 #print(orginal[i]) #print new value
         orginal = np.asarray(orginal)
         return orginal
-
+    
+    def testData(self, index):
+       y = []
+       y.append(self.__SentenceToMatrix(self.__englishTest[index]))
+       y = self.__padarray(y, 12)
+            
+       x = self.__model.predict(y)
+      # print(x)
+       x = x.astype(int)
+       #print(x)
+       
+       actual = []
+       actual.append(self.__SentenceToMatrix(self.__germanTest[index]))
+       actual = self.__padarray(actual, 12)
+       
+       val = []
+       acval = []
+       for i in range(12):
+           #round was causing loss of data
+           #strV = float(x[0,i])
+           #print(strV)
+           val.append(x[0,i])
+           acval.append(x[0,i])
+       print()
+            
+       print("Inputed Sentence " + str((self.__englishTest[index])))
+       predicted = self.__MatrixToSentence(val)
+       print("Predicted Output: " + str(predicted))
+       print("Actual Matrix:" + str(y))
+       print("Actual Matrix: " + str(acval))
+       print("Actual Output: " + self.__germanTest[index])
+       
+       #actual = actual.astype(int)
+       #actual = self.__padarray(acval, 12)
+      
+       for i in range(12):
+           if acval[i] == predicted[i]:
+               self.__count += 1
+               
+       print(self.__count)
+    
     #build model
     def BuildModel(self, tag):
         #pre process and clean data
@@ -175,7 +218,7 @@ class Translator:
         print(f"columns {words}")
         
         if tag == "RNN":
-            model = Sequential()
+            self.__model = Sequential()
             
             
            # model.add(Embedding(input_dim=5624, output_dim=64))
@@ -184,47 +227,43 @@ class Translator:
             
             #target = to_categorical(germanMat)
             
-            model.add(Embedding(input_dim=len(self.__englishWords), input_length=12, output_dim=12)) #input
-            model.add(GRU(12,input_shape=(samples, words), return_sequences=True)) # hidden 1
-            model.add(Flatten())
-            model.add(RepeatVector(12))
+            self.__model.add(Embedding(input_dim=len(self.__englishWords), input_length=12, output_dim=12)) #input
+            self.__model.add(GRU(12,input_shape=(samples, words), return_sequences=True)) # hidden 1
+            self.__model.add(Flatten())
+            self.__model.add(RepeatVector(6))
+            self.__model.add(Dropout(0.5))
             
-            model.add(Bidirectional(GRU(12, return_sequences=True)))
-            model.add(TimeDistributed((Dense(12, activation='relu'))))
-            model.add(Flatten())
-            model.add(RepeatVector(12))
-            model.add(Dropout(0.5))
+            self.__model.add(Bidirectional(GRU(12, return_sequences=True)))
+            self.__model.add(TimeDistributed((Dense(12, activation='relu'))))
+            self.__model.add(Flatten())
+            self.__model.add(RepeatVector(6))
+            self.__model.add(Dropout(0.5))
             
-            model.add(Flatten())
-            model.add(Dense(12, activation='relu')) #output
+            
+            self.__model.add(Flatten())
+            self.__model.add(Dense(12, activation='relu')) #output
             
             print("Compiling")
-            model.compile(optimizer="adam", loss='mean_squared_logarithmic_error', metrics=["accuracy"])
+            self.__model.compile(optimizer="adam", loss='mean_squared_logarithmic_error', metrics=["accuracy"])
             
             print("Fitting")
-            model.fit(englishMat, germanMat, epochs=30)
+            self.__model.fit(englishMat, germanMat, epochs=10)
             
             #englishMat.append(self.__SentenceToMatrix(self.__english[i]))
             
-            y = []
-            y.append(self.__SentenceToMatrix(self.__english[0]))
-            y = self.__padarray(y, 12)
             
-            x = model.predict(y)
-            print(x)
-            x = x.astype(int)
-            print(x)
             
-            val = []
-            for i in range(12):
-                #round was causing loss of data
-                #strV = float(x[0,i])
-                #print(strV)
-                val.append(x[0,i])
-            print()
             
-            print("Inputed Sentence " + str(self.__english[0]))
-            print("Predicted Output: " + str(self.__MatrixToSentence(val)))
+            #load test data
+            self.__LoadAllText("test",self.__germanTest, self.__englishTest)
+            
+            
+            for i in range(len(self.__englishTest)):
+                self.testData(i)
+            
+            
+            
+           
                 
                 
        

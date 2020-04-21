@@ -4,7 +4,7 @@ start_time = 0
 def start(text):
         text += "... "
         print(text)
-        start_time = time.perf_counter()
+        start_time = 0
         print()
         
    
